@@ -1,0 +1,11 @@
+
+# Dependency
+
+* GO >= 1.7
+* bcc env
+
+# Todo
+
+* More probe point: netfilter point, rp_filter, ipv4_forward
+* Drop counters ( Performance overhead should be optimized)
+* Packet tracing across multiple boxes: client to generate customized packets and track the flow of the packets. 

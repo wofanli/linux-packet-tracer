@@ -1,0 +1,66 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "467yDGx/8+osRMb1ngyuzU0VpkE=",
+			"path": "github.com/abiosoft/ishell",
+			"revision": "d66f3be248305bb9846f775138fad65c560a1ddb",
+			"revisionTime": "2017-05-22T07:02:47Z"
+		},
+		{
+			"checksumSHA1": "Wy9ZbRwHeK2/AcmvgbCJ8W0qSo8=",
+			"path": "github.com/apsdehal/go-logger",
+			"revision": "15baca6eadffd2c13e76e01890ca70eb6d4636f9",
+			"revisionTime": "2017-01-28T02:38:58Z"
+		},
+		{
+			"checksumSHA1": "AANTVr9CVVyzsgviODY6Wi2thuM=",
+			"path": "github.com/fatih/color",
+			"revision": "62e9147c64a1ed519147b62a56a14e83e2be02c1",
+			"revisionTime": "2017-05-23T20:24:04Z"
+		},
+		{
+			"checksumSHA1": "yLQg8NdQKYqqytcvKA/0EBkOIkw=",
+			"path": "github.com/flynn-archive/go-shlex",
+			"revision": "3f9db97f856818214da2e1057f8ad84803971cff",
+			"revisionTime": "2015-05-15T14:53:56Z"
+		},
+		{
+			"checksumSHA1": "FLrqYX/oUTgw9aUfKiXk6hV5LRI=",
+			"path": "github.com/iovisor/gobpf",
+			"revision": "f61d657b1631832ab743b7517822cfdcdcc27338",
+			"revisionTime": "2017-03-13T12:31:23Z",
+			"tree": true
+		},
+		{
+			"checksumSHA1": "uAVg4Tj5Fxi62z7/ScDEkHr6Ue8=",
+			"path": "github.com/mattn/go-colorable",
+			"revision": "ded68f7a9561c023e790de24279db7ebf473ea80",
+			"revisionTime": "2017-03-27T08:33:44Z"
+		},
+		{
+			"checksumSHA1": "U6lX43KDDlNOn+Z0Yyww+ZzHfFo=",
+			"path": "github.com/mattn/go-isatty",
+			"revision": "fc9e8d8ef48496124e79ae0df75490096eccf6fe",
+			"revisionTime": "2017-03-22T23:44:13Z"
+		},
+		{
+			"checksumSHA1": "rPV8+049OOLKJLcGhi5dNQ1yvBA=",
+			"path": "golang.org/x/sys/unix",
+			"revision": "a55a76086885b80f79961eacb876ebd8caf3868d",
+			"revisionTime": "2017-05-24T02:50:34Z"
+		},
+		{
+			"checksumSHA1": "VAPpB3iZ9bfjWqNDoX7qXqfRcQU=",
+			"path": "gopkg.in/readline.v1",
+			"revision": "62c6fe6193755f722b8b8788aa7357be55a50ff1",
+			"revisionTime": "2016-07-26T13:51:17Z"
+		},
+		{
+			"path": "https://github.com/kardianos/govendor",
+			"revision": ""
+		}
+	],
+	"rootPath": "tethrnet.com/packet-trace"
+}
