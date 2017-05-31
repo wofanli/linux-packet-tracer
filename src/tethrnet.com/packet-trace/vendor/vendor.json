@@ -27,10 +27,10 @@
 			"revisionTime": "2015-05-15T14:53:56Z"
 		},
 		{
-			"checksumSHA1": "FLrqYX/oUTgw9aUfKiXk6hV5LRI=",
+			"checksumSHA1": "L2QyPMGwyRY6RkrRAaEGA8sOlfI=",
 			"path": "github.com/iovisor/gobpf",
-			"revision": "f61d657b1631832ab743b7517822cfdcdcc27338",
-			"revisionTime": "2017-03-13T12:31:23Z",
+			"revision": "bd917e72d3a9b01f0649edca576e8340431ccca5",
+			"revisionTime": "2017-05-30T07:53:41Z",
 			"tree": true
 		},
 		{
