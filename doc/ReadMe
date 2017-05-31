@@ -4,8 +4,25 @@
 * GO >= 1.7
 * bcc env
 
-# Todo
+# Install guild
 
-* More probe point: netfilter point, rp_filter, ipv4_forward
-* Drop counters ( Performance overhead should be optimized)
-* Packet tracing across multiple boxes: client to generate customized packets and track the flow of the packets. 
+## Required Linux Kernel 4.4+
+
+If you are on Ubuntu, get kernel packeage from here:
+http://kernel.ubuntu.com/~kernel-ppa/mainline
+
+## Install BCC tool set
+
+https://github.com/iovisor/bcc/blob/master/INSTALL.md
+
+# Roadmap
+
+* ipsec support
+* various tunnel support (gre， vti， vxlan…)
+* netns support
+* tcp/udp support
+* reorganise the cli show output to make it more informative. 
+* high performance/low overhead various counters. Target to be feasible in production environment
+* packet tracing across multiple boxes
+* NB apis for query & management
+
