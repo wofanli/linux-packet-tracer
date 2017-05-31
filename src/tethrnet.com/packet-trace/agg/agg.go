@@ -6,6 +6,7 @@ import (
 	"sort"
 	"tethrnet.com/packet-trace/event"
 	"tethrnet.com/packet-trace/log"
+	"tethrnet.com/packet-trace/plugin"
 	"time"
 )
 
@@ -32,7 +33,13 @@ func (t TraceEventPerPacket) String() string {
 	str := ""
 	events := ([]*event.TraceEvent)(t)
 	for _, e := range events {
-		str += fmt.Sprintf("%d,%s:\n    %v\n", e.Id, e.ProbePoint, e.Msg)
+		comp := plugin.PluginId2Str(e.PluginId)
+		if comp != "" {
+			str += fmt.Sprintf("%d,%s (%s) :\n", e.Id, comp, e.ProbePoint)
+		} else {
+			str += fmt.Sprintf("%d,%s:\n", e.Id, e.ProbePoint)
+		}
+		str += fmt.Sprintf("    %v\n", e.Msg)
 	}
 	return str
 }

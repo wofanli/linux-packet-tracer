@@ -45,18 +45,56 @@ const (
 	IP_ROUTE_INPUT_NOREF_RET
 )
 
-//func GetPluginTypeStr(t int) string {
-//	switch t {
-//	case COMMON:
-//		return "common"
-//	case CLASSIFIER:
-//		return "classifier"
-//	case IP_RCV:
-//		return "ip_rcv"
-//	default:
-//		return "unknown"
-//	}
-//}
+func PluginId2Str(t uint32) string {
+	switch t {
+	case COMMON:
+		return "common"
+	case CLASSIFIER:
+		return "classifier"
+	case IP_RCV:
+		return "ip_rcv"
+	case IP_RCV_RET:
+		return "ip_rcv return"
+	case IP_RCV_FINISH:
+		return "callback after Pre Routing"
+	case IP_QUEUE_XMIT:
+		return "ip_queue_xmit"
+	case IP_FINISH_OUTPUT:
+		return "callback after Post Routing"
+	case IP_FORWARD:
+		return "ip_forward"
+	case IP_FORWARD_FINISH:
+		return "ip_forward return"
+	case NF_HOOK_SLOW:
+		return "Netfilter"
+	case NF_HOOK_SLOW_RET:
+		return "Netfilter return"
+	case KFREE_SKB:
+		return "kfree_skb"
+	case SKB_FREE_ALL:
+		return "skb_free_all"
+	case CONSUME_SKB:
+		return "consume_skb"
+	case KFREE_SKB_PARTIAL:
+		return "kfree_skb_partial"
+	case NAPI_CONSUME_SKB:
+		return "napi_consume_skb"
+	case IPT_DO_TABLE:
+		return "Iptables"
+	case IPT_DO_TABLE_RET:
+		return "Iptables return"
+	case FIB_VALIDATE_SOURCE:
+		return "rp_filter check"
+	case FIB_VALIDATE_SOURCE_RET:
+		return "rp_filter check"
+	case IP_ROUTE_INPUT_NOREF:
+		return "ip fib lookup"
+	case IP_ROUTE_INPUT_NOREF_RET:
+		return "ip fib lookup finish"
+	default:
+		return ""
+	}
+}
 
 type Plugins struct {
 	Apis []Api

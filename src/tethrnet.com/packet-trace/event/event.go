@@ -24,6 +24,7 @@ type TraceEventKey struct {
 type TraceEvent struct {
 	TraceEventKey
 	ProbePoint string
+	PluginId   uint32
 	Ts         time.Time
 	Id         uint32
 	Msg        string
@@ -36,6 +37,7 @@ func GenTraceEvent(raw []byte, pall *plugin.Plugins) *TraceEvent {
 	event.Epoch = uint(_event.epoch)
 	event.Ts = time.Now()
 	event.Id = _event.id
+	event.PluginId = _event.plugin
 	p := pall.Get(int(_event.plugin))
 	if p == nil {
 		return nil
