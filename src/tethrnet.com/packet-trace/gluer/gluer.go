@@ -99,8 +99,11 @@ func (g *Gluer) GetLogChan() chan *event.TraceEvent {
 }
 
 func (g *Gluer) Close() {
+	log.Info("Gluer is closing")
 	g.perfMap.Stop()
+	log.Info("Perf Map stopped")
 	g.module.Close()
+	log.Info("module closed")
 	g.hasStopped = true
 	g.Stop <- true
 }
