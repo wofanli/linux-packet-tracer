@@ -44,6 +44,7 @@ const (
 	FIB_VALIDATE_SOURCE_RET
 	IP_ROUTE_INPUT_NOREF
 	IP_ROUTE_INPUT_NOREF_RET
+	IP_TUNNEL_XMIT
 )
 
 func PluginId2Str(t uint32) string {

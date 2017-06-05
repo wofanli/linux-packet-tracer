@@ -31,8 +31,7 @@ int kprobe__ip_send_skb(struct pt_regs *ctx, struct net *net, struct sk_buff *sk
 		subevent->tos = hdr->tos;
 		subevent->ttl = hdr->ttl;
 		subevent->prot = hdr->prot;
-		u16 tot_len = hdr->tot_len;
-		subevent->tot_len = be16_to_cpu(tot_len);
+		subevent->tot_len = skb->len;
 	  log_events.perf_submit(ctx,&event, sizeof(event));
 	}
 	return 0;

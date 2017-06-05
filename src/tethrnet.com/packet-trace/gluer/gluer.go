@@ -13,6 +13,7 @@ import (
 	"tethrnet.com/packet-trace/plugin/iptables"
 	"tethrnet.com/packet-trace/plugin/netfilter"
 	"tethrnet.com/packet-trace/plugin/route"
+	"tethrnet.com/packet-trace/plugin/tunnel"
 	"time"
 )
 
@@ -64,6 +65,7 @@ func NewGluer(cfg *GluerConfig) *Gluer {
 		&route.FibValidateSourceRet{},
 		&route.IpRouteInputNoref{},
 		&route.IpRouteInputNorefRet{},
+		&tunnel.IpTunnelXmit{},
 	)
 
 	g := &Gluer{}

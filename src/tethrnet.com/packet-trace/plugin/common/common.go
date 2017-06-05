@@ -10,6 +10,7 @@ import (
 
 const source string = `
 #include <uapi/linux/ptrace.h>
+#include <uapi/linux/ip.h>
 #include <bcc/proto.h>
 #include <net/inet_sock.h>
 #include <linux/netfilter_ipv4.h>
@@ -145,6 +146,20 @@ typedef struct {
 } ip_hdr;
 
 `
+
+type Sub_event_ip_hdr struct {
+	Ver_ihl  uint8
+	Tos      uint8
+	Tot_len  uint16
+	Id       uint16
+	Frag_off uint16
+	Ttl      uint8
+	Prot     uint8
+	Checksum uint16
+	Src      uint32
+	Dst      uint32
+}
+
 const (
 	LOG_EVENT_TBL = "log_events"
 	GSTATUS_TBL   = "gstatus"
