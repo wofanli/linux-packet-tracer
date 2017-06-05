@@ -57,6 +57,7 @@ func NewGluer(cfg *GluerConfig) *Gluer {
 		&ip.IpFinishOutput{},
 		&ip.IpForward{},
 		&ip.IpForwardFinish{},
+		&ip.IpSendSkb{},
 		&iptables.IptDoTable{},
 		&iptables.IptDoTableRet{},
 		&route.FibValidateSource{},
