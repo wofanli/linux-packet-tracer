@@ -39,13 +39,19 @@ int kprobe__ip_rcv(struct pt_regs *ctx,struct sk_buff *skb){
 	subevent->dst = hdr->daddr;
 	if (classify(subevent->src,subevent->dst) == 0) {
 		gen_epoch(event.skb_adr,&event.epoch, &event.id);
-		subevent->tos = hdr->tos;
-		subevent->ttl = hdr->ttl;
-		subevent->prot = hdr->prot;
-		u16 tot_len = hdr->tot_len;
-		subevent->tot_len = be16_to_cpu(tot_len);
-	  log_events.perf_submit(ctx,&event, sizeof(event));
+	} else {
+        u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+        if (exist!=EXIST) {
+            return 0;
+        }
 	}
+	subevent->tos = hdr->tos;
+	subevent->ttl = hdr->ttl;
+	subevent->prot = hdr->prot;
+	u16 tot_len = hdr->tot_len;
+	subevent->tot_len = be16_to_cpu(tot_len);
+	log_events.perf_submit(ctx,&event, sizeof(event));
+	
 	return 0;
 }
 `

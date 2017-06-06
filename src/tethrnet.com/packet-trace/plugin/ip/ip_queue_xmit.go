@@ -36,16 +36,22 @@ int kprobe__ip_queue_xmit(struct pt_regs *ctx, struct sock *sk, struct sk_buff *
 	sub_event_ip_queue_xmit *subevent = (sub_event_ip_queue_xmit*)event.desc;
 	subevent->src = fl->u.ip4.saddr;
 	subevent->dst = fl->u.ip4.daddr;
+
 	if (classify(subevent->src,subevent->dst) == 0) {
 		gen_epoch(event.skb_adr,&event.epoch, &event.id);
-		subevent->oif  =  fl->u.ip4.flowi4_oif;
-		subevent->iif  =  fl->u.ip4.flowi4_iif;
-		subevent->mark = fl->u.ip4.flowi4_mark;
-	 	subevent->tos  =  fl->u.ip4.flowi4_tos;
-		subevent->prot = fl->u.ip4.flowi4_proto;
-		subevent->flowi_uli = fl->u.ip4.fl4_gre_key;
-		log_events.perf_submit(ctx,&event, sizeof(event));
+   	} else { 
+		u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+		if (exist!=EXIST) {
+			return 0;
+		}
 	}
+	subevent->oif  =  fl->u.ip4.flowi4_oif;
+	subevent->iif  =  fl->u.ip4.flowi4_iif;
+	subevent->mark = fl->u.ip4.flowi4_mark;
+	subevent->tos  =  fl->u.ip4.flowi4_tos;
+	subevent->prot = fl->u.ip4.flowi4_proto;
+	subevent->flowi_uli = fl->u.ip4.fl4_gre_key;
+	log_events.perf_submit(ctx,&event, sizeof(event));
 	return 0;
 }
 `

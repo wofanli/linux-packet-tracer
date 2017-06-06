@@ -28,12 +28,17 @@ int kprobe__ip_send_skb(struct pt_regs *ctx, struct net *net, struct sk_buff *sk
 	subevent->dst = hdr->daddr;
 	if (classify(subevent->src,subevent->dst) == 0) {
 		gen_epoch(event.skb_adr,&event.epoch, &event.id);
-		subevent->tos = hdr->tos;
-		subevent->ttl = hdr->ttl;
-		subevent->prot = hdr->prot;
-		subevent->tot_len = skb->len;
-	  log_events.perf_submit(ctx,&event, sizeof(event));
+	} else {
+        u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+        if (exist!=EXIST) {
+            return 0;
+        }
 	}
+	subevent->tos = hdr->tos;
+	subevent->ttl = hdr->ttl;
+	subevent->prot = hdr->prot;
+	subevent->tot_len = skb->len;
+	log_events.perf_submit(ctx,&event, sizeof(event));
 	return 0;
 }
 `

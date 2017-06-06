@@ -125,6 +125,8 @@ func GetInterfaces() map[int]string {
 	}
 	for _, intf := range interfaces {
 		ret[intf.Index] = intf.Name
+		log.Debugf("found interface mapping:%v,%v\n",
+			intf.Index, intf.Name)
 	}
 	return ret
 }
