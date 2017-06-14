@@ -11,6 +11,7 @@ import (
 const source string = `
 #include <uapi/linux/ptrace.h>
 #include <uapi/linux/ip.h>
+#include <uapi/linux/tcp.h>
 #include <bcc/proto.h>
 #include <net/inet_sock.h>
 #include <linux/netfilter_ipv4.h>
@@ -144,6 +145,17 @@ typedef struct {
 	u32 saddr;
 	u32 daddr;
 } ip_hdr;
+
+typedef struct {
+	u16 source;
+	u16 dest;
+	u32 seq;
+	u32 ack_seq;
+	u16 flag;
+	u16 window;
+	u16 check;
+	u16 urg_ptr;
+} tcp_hdr;
 
 `
 

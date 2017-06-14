@@ -17,6 +17,38 @@ func isHostBigEndian() bool {
 	return bytes[3] == 1
 }
 
+func TcpFlag2Str(flag uint16) string {
+	str := ""
+	if isHostBigEndian() {
+		if (flag & 0x8000) != 0 {
+			str += ", FIN"
+		}
+		if (flag & 0x4000) != 0 {
+			str += ", SYN"
+		}
+		if (flag & 0x2000) != 0 {
+			str += ", RST"
+		}
+		if (flag & 0x800) != 0 {
+			str += ", ACK"
+		}
+	} else {
+		if (flag & 0x100) != 0 {
+			str += ", FIN"
+		}
+		if (flag & 0x200) != 0 {
+			str += ", SYN"
+		}
+		if (flag & 0x400) != 0 {
+			str += ", RST"
+		}
+		if (flag & 0x1000) != 0 {
+			str += ", ACK"
+		}
+	}
+	return str
+}
+
 func Ip2Int(ip net.IP) uint32 {
 	if len(ip) == 16 {
 		return binary.LittleEndian.Uint32(ip[12:16])
