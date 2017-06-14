@@ -50,7 +50,7 @@ func (p *IpRouteInputNorefRet) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	event := (*sub_event_ip_route_input_noref)(unsafe.Pointer(uintptr(C.CBytes(data))))
 	errStr := "no route. Check route table & ip_forward & rp_filter config"
 	if event.err == 0 {
-		errStr = "found route"
+		errStr = "route lookup ends"
 	}
 	return fmt.Sprintf("ip route lookup: dst(%v), src(%v), iif(%v),  %v",
 		util.Int2Ip(event.dst),
