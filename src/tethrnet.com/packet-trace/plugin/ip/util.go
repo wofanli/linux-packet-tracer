@@ -16,14 +16,15 @@ func getPorts(uli [4]byte) (uint16, uint16) {
 
 func decodeTcpUdp(event *sub_event_ip_queue_xmit) string {
 	sport, dport := getPorts(event.flowi_uli)
-	return fmt.Sprintf("%v(%v:%v)->%v(%v:%v), mark:0x%x, tos:%d, protocol:%v",
+	return fmt.Sprintf("%v(%v:%v)->%v(%v:%v), mark:0x%x, tos:%d, protocol:%v, skb_data_len:%d",
 		common.CommonInst.GetIntf(int(event.iif)),
 		util.Int2Ip(event.src), sport,
 		common.CommonInst.GetIntf(int(event.oif)),
 		util.Int2Ip(event.dst), dport,
 		event.mark,
 		event.tos,
-		util.IPv4ProtToStr(event.prot))
+		util.IPv4ProtToStr(event.prot),
+		event.skb_data_len)
 }
 
 func icmpType2Str(icmpType int) string {

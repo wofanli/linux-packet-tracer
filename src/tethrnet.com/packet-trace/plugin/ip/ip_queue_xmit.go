@@ -25,6 +25,7 @@ typedef struct {
 	u8 prot;
 	u16 pad;
 	u32 flowi_uli;	
+	u32 skb_data_len;
 } sub_event_ip_queue_xmit;
 
 int kprobe__ip_queue_xmit(struct pt_regs *ctx, struct sock *sk, struct sk_buff *skb, struct flowi *fl){
@@ -51,6 +52,7 @@ int kprobe__ip_queue_xmit(struct pt_regs *ctx, struct sock *sk, struct sk_buff *
 	subevent->tos  =  fl->u.ip4.flowi4_tos;
 	subevent->prot = fl->u.ip4.flowi4_proto;
 	subevent->flowi_uli = fl->u.ip4.fl4_gre_key;
+	subevent->skb_data_len = skb->data_len;
 	log_events.perf_submit(ctx,&event, sizeof(event));
 	return 0;
 }
@@ -63,6 +65,7 @@ type sub_event_ip_queue_xmit struct {
 	tos, prot      uint8
 	pad            uint16
 	flowi_uli      [4]byte
+	skb_data_len   uint32
 }
 
 type IpQueueXmit struct {
@@ -87,7 +90,7 @@ func (p *IpQueueXmit) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	case util.PROT_ESP:
 		return decodeEsp(event)
 	default:
-		return fmt.Sprintf("%v(%v:%v)->%v(%v:%v), mark:0x%x, tos:%d, protocol:%v, flowi_uli:%v",
+		return fmt.Sprintf("%v(%v:%v)->%v(%v:%v), mark:0x%x, tos:%d, protocol:%v, flowi_uli:%v, skb data_len: %d",
 			common.CommonInst.GetIntf(int(event.iif)),
 			util.Int2Ip(event.src), event.sport,
 			common.CommonInst.GetIntf(int(event.oif)),
@@ -95,7 +98,8 @@ func (p *IpQueueXmit) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 			event.mark,
 			event.tos,
 			util.IPv4ProtToStr(event.prot),
-			event.flowi_uli)
+			event.flowi_uli,
+			event.skb_data_len)
 	}
 }
 

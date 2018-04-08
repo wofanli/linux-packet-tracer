@@ -100,6 +100,13 @@ func (a *Agg) stop() {
 	idx := 0
 	for _, cache := range a.cacheMap {
 		sort.Sort(TraceEventPerPacket(cache))
+		for eventIdx := 0; eventIdx < len(cache); eventIdx++ {
+			if cache[eventIdx].PluginId == plugin.IP_ERROR && eventIdx > 0 &&
+				(cache[eventIdx-1].PluginId == plugin.IP_ROUTE_INPUT_NOREF ||
+					cache[eventIdx-1].PluginId == plugin.IP_ROUTE_INPUT_NOREF_RET) {
+				cache[eventIdx].Msg += " Check route table & ipv4_forward config."
+			}
+		}
 		a.result[idx] = TraceEventPerPacket(cache)
 		idx++
 	}
