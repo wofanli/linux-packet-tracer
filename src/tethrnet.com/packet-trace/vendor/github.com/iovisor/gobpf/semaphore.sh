@@ -10,8 +10,8 @@
 set -eux
 set -o pipefail
 
-readonly kernel_versions=("4.4.45" "4.9.6")
-readonly rkt_version="1.23.0"
+readonly kernel_versions=("4.4.114" "4.9.79" "4.14.16")
+readonly rkt_version="1.29.0"
 
 if [[ ! -f "./rkt/rkt" ]] \
   || [[ ! "$(./rkt/rkt version | awk '/rkt Version/{print $3}')" == "${rkt_version}" ]]; then
@@ -38,7 +38,8 @@ for kernel_version in "${kernel_versions[@]}"; do
     --dns=8.8.8.8 \
     --stage1-name="kinvolk.io/aci/rkt/stage1-kvm:${rkt_version},kernelversion=${kernel_version}" \
     --volume=gobpf,kind=host,source="$PWD" \
-    docker://schu/gobpf-ci \
+    docker://schu/gobpf-ci:d54e7abfe980c7d59ca6929f4f3552ea891260b0 \
+    --memory=1024M \
     --mount=volume=gobpf,target=/go/src/github.com/iovisor/gobpf \
     --environment=GOPATH=/go \
     --environment=C_INCLUDE_PATH="${kernel_api_header_dir}" \
@@ -53,4 +54,6 @@ for kernel_version in "${kernel_versions[@]}"; do
   if [[ $test_status -ne 0 ]]; then
     exit "$test_status"
   fi
+
+  sudo ./rkt/rkt gc --grace-period=0
 done

@@ -18,7 +18,8 @@ https://github.com/iovisor/bcc/blob/master/docs/kernel-versions.md
 
 ### `github.com/iovisor/gobpf/bcc`
 
-Install [libbcc](https://github.com/iovisor/bcc/blob/master/INSTALL.md) (either by package or source).
+Install the latest released version of [libbcc](https://github.com/iovisor/bcc/blob/master/INSTALL.md)
+(either by package or source).
 
 ### `github.com/iovisor/gobpf/elf`
 
@@ -32,6 +33,7 @@ sections (`SEC("...")`). Currently supported are:
 * `cgroup/sock`
 * `maps/...`
 * `socket...`
+* `tracepoint...`
 
 Map definitions must correspond to `bpf_map_def` from [elf.go](https://github.com/iovisor/gobpf/blob/master/elf/elf.go)
 Otherwise you will encounter an error like `only one map with size 280 bytes allowed per section (check bpf_map_def)`.
@@ -48,7 +50,7 @@ for a real world example.
 Example code can be found in the `examples/` directory, e.g.
 
 ```
-sudo -E go run examples/perf.go
+sudo -E go run examples/bcc/perf/perf.go
 ```
 
 ## Tests
@@ -58,8 +60,5 @@ containers on different kernel versions. To run all tests on the host system,
 use `go test` as follows:
 
 ```
-go test -tags integration -v \
-  github.com/iovisor/gobpf \
-  github.com/iovisor/gobpf/elf \
-  github.com/iovisor/gobpf/bcc
+go test -tags integration -v ./...
 ```

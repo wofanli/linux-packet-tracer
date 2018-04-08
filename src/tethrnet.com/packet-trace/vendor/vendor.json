@@ -27,10 +27,10 @@
 			"revisionTime": "2015-05-15T14:53:56Z"
 		},
 		{
-			"checksumSHA1": "L2QyPMGwyRY6RkrRAaEGA8sOlfI=",
+			"checksumSHA1": "y2B6/PdhVgA4fh+Iv9byfXtCqn0=",
 			"path": "github.com/iovisor/gobpf",
-			"revision": "bd917e72d3a9b01f0649edca576e8340431ccca5",
-			"revisionTime": "2017-05-30T07:53:41Z",
+			"revision": "a0944e60a853e089f9e10a21076de6ba5bfb335c",
+			"revisionTime": "2018-03-28T06:37:01Z",
 			"tree": true
 		},
 		{
@@ -56,6 +56,10 @@
 			"path": "gopkg.in/readline.v1",
 			"revision": "62c6fe6193755f722b8b8788aa7357be55a50ff1",
 			"revisionTime": "2016-07-26T13:51:17Z"
+		},
+		{
+			"path": "https://github.com/iovisor/gobpf",
+			"revision": ""
 		},
 		{
 			"path": "https://github.com/kardianos/govendor",

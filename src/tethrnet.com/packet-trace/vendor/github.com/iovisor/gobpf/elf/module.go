@@ -25,7 +25,6 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
@@ -84,9 +83,9 @@ int bpf_attach_socket(int sock, int fd)
 	return setsockopt(sock, SOL_SOCKET, SO_ATTACH_BPF, &fd, sizeof(fd));
 }
 
-int bpf_detach_socket(int sock)
+int bpf_detach_socket(int sock, int fd)
 {
-	return setsockopt(sock, SOL_SOCKET, SO_DETACH_BPF, NULL, 0);
+	return setsockopt(sock, SOL_SOCKET, SO_DETACH_BPF, &fd, sizeof(fd));
 }
 */
 import "C"
@@ -96,11 +95,13 @@ type Module struct {
 	fileReader io.ReaderAt
 	file       *elf.File
 
-	log            []byte
-	maps           map[string]*Map
-	probes         map[string]*Kprobe
-	cgroupPrograms map[string]*CgroupProgram
-	socketFilters  map[string]*SocketFilter
+	log                []byte
+	maps               map[string]*Map
+	probes             map[string]*Kprobe
+	cgroupPrograms     map[string]*CgroupProgram
+	socketFilters      map[string]*SocketFilter
+	tracepointPrograms map[string]*TracepointProgram
+	schedPrograms      map[string]*SchedProgram
 }
 
 // Kprobe represents a kprobe or kretprobe and has to be declared
@@ -134,22 +135,42 @@ type SocketFilter struct {
 	fd    int
 }
 
-func NewModule(fileName string) *Module {
+// TracepointProgram represents a tracepoint program
+type TracepointProgram struct {
+	Name  string
+	insns *C.struct_bpf_insn
+	fd    int
+	efd   int
+}
+
+// SchedProgram represents a traffic classifier program
+type SchedProgram struct {
+	Name  string
+	insns *C.struct_bpf_insn
+	fd    int
+}
+
+func newModule() *Module {
 	return &Module{
-		fileName:       fileName,
-		probes:         make(map[string]*Kprobe),
-		cgroupPrograms: make(map[string]*CgroupProgram),
-		socketFilters:  make(map[string]*SocketFilter),
-		log:            make([]byte, 65536),
+		probes:             make(map[string]*Kprobe),
+		cgroupPrograms:     make(map[string]*CgroupProgram),
+		socketFilters:      make(map[string]*SocketFilter),
+		tracepointPrograms: make(map[string]*TracepointProgram),
+		schedPrograms:      make(map[string]*SchedProgram),
+		log:                make([]byte, 524288),
 	}
 }
 
+func NewModule(fileName string) *Module {
+	module := newModule()
+	module.fileName = fileName
+	return module
+}
+
 func NewModuleFromReader(fileReader io.ReaderAt) *Module {
-	return &Module{
-		fileReader: fileReader,
-		probes:     make(map[string]*Kprobe),
-		log:        make([]byte, 65536),
-	}
+	module := newModule()
+	module.fileReader = fileReader
+	return module
 }
 
 var kprobeIDNotExist error = errors.New("kprobe id file doesn't exist")
@@ -182,6 +203,27 @@ func writeKprobeEvent(probeType, eventName, funcName, maxactiveStr string) (int,
 	}
 
 	return kprobeId, nil
+}
+
+func perfEventOpenTracepoint(id int, progFd int) (int, error) {
+	efd, err := C.perf_event_open_tracepoint(C.int(id), -1 /* pid */, 0 /* cpu */, -1 /* group_fd */, C.PERF_FLAG_FD_CLOEXEC)
+	if efd < 0 {
+		return -1, fmt.Errorf("perf_event_open error: %v", err)
+	}
+
+	if _, _, err := syscall.Syscall(syscall.SYS_IOCTL, uintptr(efd), C.PERF_EVENT_IOC_ENABLE, 0); err != 0 {
+		return -1, fmt.Errorf("error enabling perf event: %v", err)
+	}
+
+	if _, _, err := syscall.Syscall(syscall.SYS_IOCTL, uintptr(efd), C.PERF_EVENT_IOC_SET_BPF, uintptr(progFd)); err != 0 {
+		return -1, fmt.Errorf("error attaching bpf program to perf event: %v", err)
+	}
+	return int(efd), nil
+}
+
+// Log gives users access to the log buffer with verifier messages
+func (b *Module) Log() []byte {
+	return b.log
 }
 
 // EnableKprobe enables a kprobe/kretprobe identified by secName.
@@ -220,22 +262,43 @@ func (b *Module) EnableKprobe(secName string, maxactive int) error {
 		return err
 	}
 
-	efd := C.perf_event_open_tracepoint(C.int(kprobeId), -1 /* pid */, 0 /* cpu */, -1 /* group_fd */, C.PERF_FLAG_FD_CLOEXEC)
-	if efd < 0 {
-		return fmt.Errorf("perf_event_open for kprobe error")
+	probe.efd, err = perfEventOpenTracepoint(kprobeId, progFd)
+	return err
+}
+
+func writeTracepointEvent(category, name string) (int, error) {
+	tracepointIdFile := fmt.Sprintf("/sys/kernel/debug/tracing/events/%s/%s/id", category, name)
+	tracepointIdBytes, err := ioutil.ReadFile(tracepointIdFile)
+	if err != nil {
+		return -1, fmt.Errorf("cannot read tracepoint id %q: %v", tracepointIdFile, err)
 	}
 
-	_, _, err2 := syscall.Syscall(syscall.SYS_IOCTL, uintptr(efd), C.PERF_EVENT_IOC_ENABLE, 0)
-	if err2 != 0 {
-		return fmt.Errorf("error enabling perf event: %v", err2)
+	tracepointId, err := strconv.Atoi(strings.TrimSpace(string(tracepointIdBytes)))
+	if err != nil {
+		return -1, fmt.Errorf("invalid tracepoint id: %v\n", err)
 	}
 
-	_, _, err2 = syscall.Syscall(syscall.SYS_IOCTL, uintptr(efd), C.PERF_EVENT_IOC_SET_BPF, uintptr(progFd))
-	if err2 != 0 {
-		return fmt.Errorf("error enabling perf event: %v", err2)
+	return tracepointId, nil
+}
+
+func (b *Module) EnableTracepoint(secName string) error {
+	prog, ok := b.tracepointPrograms[secName]
+	if !ok {
+		return fmt.Errorf("no such tracepoint program %q", secName)
 	}
-	probe.efd = int(efd)
-	return nil
+	progFd := prog.fd
+
+	tracepointGroup := strings.SplitN(secName, "/", 3)
+	category := tracepointGroup[1]
+	name := tracepointGroup[2]
+
+	tracepointId, err := writeTracepointEvent(category, name)
+	if err != nil {
+		return err
+	}
+
+	prog.efd, err = perfEventOpenTracepoint(tracepointId, progFd)
+	return err
 }
 
 // IterKprobes returns a channel that emits the kprobes that included in the
@@ -275,8 +338,23 @@ func (b *Module) IterCgroupProgram() <-chan *CgroupProgram {
 	return ch
 }
 
+func (b *Module) IterTracepointProgram() <-chan *TracepointProgram {
+	ch := make(chan *TracepointProgram)
+	go func() {
+		for name := range b.tracepointPrograms {
+			ch <- b.tracepointPrograms[name]
+		}
+		close(ch)
+	}()
+	return ch
+}
+
 func (b *Module) CgroupProgram(name string) *CgroupProgram {
 	return b.cgroupPrograms[name]
+}
+
+func (p *CgroupProgram) Fd() int {
+	return p.fd
 }
 
 func AttachCgroupProgram(cgroupProg *CgroupProgram, cgroupPath string, attachType AttachType) error {
@@ -341,8 +419,8 @@ func (sf *SocketFilter) Fd() int {
 	return sf.fd
 }
 
-func DetachSocketFilter(sockFd int) error {
-	ret, err := C.bpf_detach_socket(C.int(sockFd))
+func DetachSocketFilter(socketFilter *SocketFilter, sockFd int) error {
+	ret, err := C.bpf_detach_socket(C.int(sockFd), C.int(socketFilter.fd))
 	if ret != 0 {
 		return fmt.Errorf("error detaching BPF socket filter: %v", err)
 	}
@@ -381,11 +459,22 @@ func disableKprobe(eventName string) error {
 	return nil
 }
 
+func (b *Module) SchedProgram(name string) *SchedProgram {
+	return b.schedPrograms[name]
+}
+
+func (sp *SchedProgram) Fd() int {
+	return sp.fd
+}
+
 func (b *Module) closeProbes() error {
 	var funcName string
 	for _, probe := range b.probes {
-		if err := syscall.Close(probe.efd); err != nil {
-			return fmt.Errorf("error closing perf event fd: %v", err)
+		if probe.efd != -1 {
+			if err := syscall.Close(probe.efd); err != nil {
+				return fmt.Errorf("error closing perf event fd: %v", err)
+			}
+			probe.efd = -1
 		}
 		if err := syscall.Close(probe.fd); err != nil {
 			return fmt.Errorf("error closing probe fd: %v", err)
@@ -402,6 +491,21 @@ func (b *Module) closeProbes() error {
 		}
 		if err != nil {
 			return fmt.Errorf("error clearing probe: %v", err)
+		}
+	}
+	return nil
+}
+
+func (b *Module) closeTracepointPrograms() error {
+	for _, program := range b.tracepointPrograms {
+		if program.efd != -1 {
+			if err := syscall.Close(program.efd); err != nil {
+				return fmt.Errorf("error closing perf event fd: %v", err)
+			}
+			program.efd = -1
+		}
+		if err := syscall.Close(program.fd); err != nil {
+			return fmt.Errorf("error closing tracepoint program fd: %v", err)
 		}
 	}
 	return nil
@@ -425,19 +529,35 @@ func (b *Module) closeSocketFilters() error {
 	return nil
 }
 
-func unpinMap(m *Map) error {
-	if m.m.def.pinning == 0 {
-		return nil
+func unpinMap(m *Map, pinPath string) error {
+	mapPath, err := getMapPath(&m.m.def, m.Name, pinPath)
+	if err != nil {
+		return err
 	}
-	namespace := C.GoString(&m.m.def.namespace[0])
-	mapPath := filepath.Join(BPFFSPath, namespace, BPFDirGlobals, m.Name)
 	return syscall.Unlink(mapPath)
 }
 
-func (b *Module) closeMaps() error {
+func (b *Module) closeMaps(options map[string]CloseOptions) error {
 	for _, m := range b.maps {
-		if m.m.def.pinning > 0 {
-			unpinMap(m)
+		doUnpin := options[fmt.Sprintf("maps/%s", m.Name)].Unpin
+		if doUnpin {
+			mapDef := m.m.def
+			var pinPath string
+			if mapDef.pinning == PIN_CUSTOM_NS {
+				closeOption, ok := options[fmt.Sprintf("maps/%s", m.Name)]
+				if !ok {
+					return fmt.Errorf("close option for maps/%s must have PinPath set", m.Name)
+				}
+				pinPath = closeOption.PinPath
+			} else if mapDef.pinning == PIN_GLOBAL_NS {
+				// mapDef.namespace is used for PIN_GLOBAL_NS maps
+				pinPath = ""
+			} else if mapDef.pinning == PIN_OBJECT_NS {
+				return fmt.Errorf("unpinning with PIN_OBJECT_NS is to be implemented")
+			}
+			if err := unpinMap(m, pinPath); err != nil {
+				return fmt.Errorf("error unpinning map %q: %v", m.Name, err)
+			}
 		}
 		for _, fd := range m.pmuFDs {
 			if err := syscall.Close(int(fd)); err != nil {
@@ -452,6 +572,13 @@ func (b *Module) closeMaps() error {
 	return nil
 }
 
+// CloseOptions can be used for custom `Close` parameters
+type CloseOptions struct {
+	// Set Unpin to true to close pinned maps as well
+	Unpin   bool
+	PinPath string
+}
+
 // Close takes care of terminating all underlying BPF programs and structures.
 // That is:
 //
@@ -462,14 +589,23 @@ func (b *Module) closeMaps() error {
 //
 // It doesn't detach BPF programs from cgroups or sockets because they're
 // considered resources the user controls.
+// It also doesn't unpin pinned maps. Use CloseExt and set Unpin to do this.
 func (b *Module) Close() error {
-	if err := b.closeMaps(); err != nil {
+	return b.CloseExt(nil)
+}
+
+// CloseExt takes a map "elf section -> CloseOptions"
+func (b *Module) CloseExt(options map[string]CloseOptions) error {
+	if err := b.closeMaps(options); err != nil {
 		return err
 	}
 	if err := b.closeProbes(); err != nil {
 		return err
 	}
 	if err := b.closeCgroupPrograms(); err != nil {
+		return err
+	}
+	if err := b.closeTracepointPrograms(); err != nil {
 		return err
 	}
 	if err := b.closeSocketFilters(); err != nil {
