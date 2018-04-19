@@ -46,6 +46,12 @@
 			"revisionTime": "2017-03-22T23:44:13Z"
 		},
 		{
+			"checksumSHA1": "P7gR/mj56/a7m4iXH/fdFZma/oo=",
+			"path": "github.com/qiniu/log",
+			"revision": "e002bc2020b19bfa61ed378cc5407383dbd2f346",
+			"revisionTime": "2014-07-28T01:23:31Z"
+		},
+		{
 			"checksumSHA1": "rPV8+049OOLKJLcGhi5dNQ1yvBA=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "a55a76086885b80f79961eacb876ebd8caf3868d",
@@ -63,6 +69,10 @@
 		},
 		{
 			"path": "https://github.com/kardianos/govendor",
+			"revision": ""
+		},
+		{
+			"path": "https://github.com/qiniu/log",
 			"revision": ""
 		}
 	],
