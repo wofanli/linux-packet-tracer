@@ -3,8 +3,8 @@ package util
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/qiniu/log"
 	"net"
-	"tethrnet.com/packet-trace/log"
 	"unsafe"
 )
 

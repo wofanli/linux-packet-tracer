@@ -3,9 +3,9 @@ package agg
 import (
 	"errors"
 	"fmt"
+	"github.com/qiniu/log"
 	"sort"
 	"tethrnet.com/packet-trace/event"
-	"tethrnet.com/packet-trace/log"
 	"tethrnet.com/packet-trace/plugin"
 	"time"
 )

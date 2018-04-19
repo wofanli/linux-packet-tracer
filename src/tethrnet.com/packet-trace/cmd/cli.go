@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/abiosoft/ishell"
+	"github.com/qiniu/log"
 	"net"
 	"strconv"
 	"tethrnet.com/packet-trace/agg"
 	"tethrnet.com/packet-trace/gluer"
-	"tethrnet.com/packet-trace/log"
 	"time"
 )
 

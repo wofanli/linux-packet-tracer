@@ -15,7 +15,7 @@
 package main
 
 import (
-	"tethrnet.com/packet-trace/log"
+	"github.com/qiniu/log"
 )
 
 import "C"

@@ -3,7 +3,7 @@ package plugin
 import (
 	"errors"
 	bpf "github.com/iovisor/gobpf/bcc"
-	"tethrnet.com/packet-trace/log"
+	"github.com/qiniu/log"
 )
 
 const (

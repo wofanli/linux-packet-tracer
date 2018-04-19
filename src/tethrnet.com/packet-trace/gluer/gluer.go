@@ -2,10 +2,10 @@ package gluer
 
 import (
 	bpf "github.com/iovisor/gobpf/bcc"
+	"github.com/qiniu/log"
 	"net"
 	"tethrnet.com/packet-trace/agg"
 	"tethrnet.com/packet-trace/event"
-	"tethrnet.com/packet-trace/log"
 	"tethrnet.com/packet-trace/plugin"
 	"tethrnet.com/packet-trace/plugin/classifier"
 	"tethrnet.com/packet-trace/plugin/common"
