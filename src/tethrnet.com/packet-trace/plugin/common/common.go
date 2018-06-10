@@ -22,7 +22,7 @@ typedef struct {
 	uint32_t epoch;
 	uint32_t plugin;
 	uint32_t id;
-	uint32_t pad;
+	uint32_t pid;
 	char desc[___MAX_MSG_LEN___];
 } log_event_t;
 
@@ -60,20 +60,21 @@ BPF_HASH(skb_status, u64, skb_status_t);
 // return 0 if existing skb. 
 // will create skb if not existing
 // otherwise it is a new skb
-static inline u8 gen_epoch(u64 skb, u32 *e, u32 *id) {
-	u64 key = skb;
+static inline u8 gen_epoch(log_event_t* event) {
+	u64 key = event->skb_adr;
 	skb_status_t *val = skb_status.lookup(&key);
+	event->pid = bpf_get_current_pid_tgid();
 	if (!val) {
 		skb_status_t s;
 		s.epoch = epoch_inc();
 		s.next_id = 1;
 		skb_status.update(&key, &s);
-		*e = s.epoch;
-		*id = 0;
+		event->epoch = s.epoch;
+		event->id = 0;
 		return NEW;
 	} else {
-		*e = val->epoch;
-		*id = val->next_id;
+		event->epoch = val->epoch;
+		event->id = val->next_id;
 		val->next_id++;
 		return EXIST;
 	}
@@ -91,14 +92,15 @@ static inline u8 is_skb_ontracked(u64 skb) {
 
 // return 0 if existing skb.
 // will no create skb if not existing 
-static inline u8 get_epoch(u64 skb, u32 *e, u32 *id) {
-	u64 key = skb;
+static inline u8 get_epoch(log_event_t* event ) {
+	event->pid = bpf_get_current_pid_tgid();
+	u64 key = event->skb_adr;
 	skb_status_t *val = skb_status.lookup(&key);
 	if (!val) {
 		return NEW;
 	} else {
-		*e = val->epoch;
-		*id = val->next_id;
+		event->epoch = val->epoch;
+		event->id = val->next_id;
 		val->next_id++;
 		return EXIST;
 	}

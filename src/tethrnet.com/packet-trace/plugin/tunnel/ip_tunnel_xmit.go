@@ -23,7 +23,7 @@ int kprobe__ip_tunnel_xmit(struct pt_regs *ctx,struct sk_buff *skb, struct net_d
 	log_event_t event = {};
 
 	event.skb_adr = (u64)(skb);
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	event.plugin = ___plugintype___;
 	sub_event_tunnel *subevent = (sub_event_tunnel*)event.desc;
 	

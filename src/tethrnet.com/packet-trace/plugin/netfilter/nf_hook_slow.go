@@ -43,7 +43,7 @@ typedef struct {
 int kprobe__nf_hook_slow(struct pt_regs *ctx, struct sk_buff *skb, struct nf_hook_state *state){
 	log_event_t event = {};
 	event.skb_adr = (u64)skb;
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	event.plugin = ___plugintype___;
 	sub_event_nf_hook_slow *subevent = (sub_event_nf_hook_slow*)event.desc;
 

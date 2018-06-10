@@ -16,7 +16,7 @@ int kprobe__ip_forward_finish(struct pt_regs *ctx,struct net *net, struct sock *
 	log_event_t event = {};
 	sub_event_ip_rcv_finish *subevent = (sub_event_ip_rcv_finish*)event.desc;
 	event.skb_adr = (u64)skb;
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	event.plugin = ___plugintype___;
 
 	if (exist==EXIST) {

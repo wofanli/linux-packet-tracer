@@ -47,6 +47,7 @@ func NewGluer(cfg *GluerConfig) *Gluer {
 		common.NewCommon(),
 		classifier.NewClassifier(cfg.MatchSrc, cfg.MatchDst),
 		&common.KfreeSkb{},
+		&common.DoKfreeSkb{},
 		&common.SkbReleaseAll{},
 		&common.KfreeSkbPartial{},
 		&common.ConsumeSkb{},

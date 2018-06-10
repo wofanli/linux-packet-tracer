@@ -39,9 +39,9 @@ int kprobe__ip_queue_xmit(struct pt_regs *ctx, struct sock *sk, struct sk_buff *
 	subevent->dst = fl->u.ip4.daddr;
 
 	if (classify(subevent->src,subevent->dst) == 0) {
-		gen_epoch(event.skb_adr,&event.epoch, &event.id);
+		gen_epoch(&event);
    	} else { 
-		u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+		u8 exist = get_epoch(&event);
 		if (exist!=EXIST) {
 			return 0;
 		}

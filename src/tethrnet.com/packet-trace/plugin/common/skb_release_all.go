@@ -11,7 +11,7 @@ const source_skb_release_all string = `
 int kprobe__skb_release_all(struct pt_regs *ctx, struct sk_buff *skb){
 	log_event_t event = {};
 	event.skb_adr = (u64) skb;
-	u8 is_exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 is_exist = get_epoch(&event);
 
 	if (is_exist==EXIST) {
 		release_epoch(event.skb_adr);

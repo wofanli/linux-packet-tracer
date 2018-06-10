@@ -38,7 +38,7 @@ int kprobe__ipt_do_table(struct pt_regs *ctx, struct sk_buff *skb,
 						 struct xt_table *table){
 	log_event_t event = {};
 	event.skb_adr = (u64)skb;
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	event.plugin = ___plugintype___;
 	sub_event_ipt_do_table_t *subevent = (sub_event_ipt_do_table_t*)event.desc;
 

@@ -35,9 +35,9 @@ func (t TraceEventPerPacket) String() string {
 	for _, e := range events {
 		comp := plugin.PluginId2Str(e.PluginId)
 		if comp != "" {
-			str += fmt.Sprintf("%d,%s (%s) :\n", e.Id, comp, e.ProbePoint)
+			str += fmt.Sprintf("%d,%s (%s), process: %v (pid %d), netns:%v\n", e.Id, comp, e.ProbePoint, e.Cmd, e.Pid, e.Netns)
 		} else {
-			str += fmt.Sprintf("%d,%s:\n", e.Id, e.ProbePoint)
+			str += fmt.Sprintf("%d,%s, process: %v (pid %d), netns:%v\n", e.Id, e.ProbePoint, e.Cmd, e.Pid, e.Netns)
 		}
 		str += fmt.Sprintf("    %v\n", e.Msg)
 	}

@@ -14,7 +14,7 @@ int kprobe__ip_finish_output(struct pt_regs *ctx,struct net *net, struct sock *s
 	log_event_t event = {};
 
 	event.skb_adr = (u64)skb;
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	event.plugin = ___plugintype___;
 
 	if (exist==EXIST) {

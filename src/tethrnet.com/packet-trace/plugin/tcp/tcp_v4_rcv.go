@@ -24,7 +24,7 @@ int kprobe__tcp_v4_rcv(struct pt_regs *ctx,struct sk_buff *skb){
 	event.plugin = ___plugintype___;
 	sub_event_tcp_v4_rcv *subevent = (sub_event_tcp_v4_rcv*)event.desc;
 
-	u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+	u8 exist = get_epoch(&event);
 	if (exist==EXIST) {
 		unsigned char * hdr_ = skb->head + skb->network_header;
 		ip_hdr *hdr = (ip_hdr*)hdr_;

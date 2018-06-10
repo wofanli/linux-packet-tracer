@@ -21,7 +21,7 @@ int kretprobe__fib_validate_source(struct pt_regs *ctx){
 		return 0;
 	}else {
 		event.skb_adr = (u64)(cache->skb);
-		u8 exist = get_epoch(event.skb_adr,&event.epoch, &event.id);
+		u8 exist = get_epoch(&event);
 		event.plugin = ___plugintype___;
 		sub_event_fib_validate_source *subevent = (sub_event_fib_validate_source*)event.desc;
 

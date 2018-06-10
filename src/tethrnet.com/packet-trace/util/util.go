@@ -1,10 +1,15 @@
 package util
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"github.com/qiniu/log"
 	"net"
+	"os"
+	"os/exec"
+	"strconv"
+	"strings"
 	"unsafe"
 )
 
@@ -161,4 +166,32 @@ func GetInterfaces() map[int]string {
 			intf.Index, intf.Name)
 	}
 	return ret
+}
+
+func Pid2Netns(pid int) string {
+	cmd := exec.Command("bash", "-c", "ip netns identify "+strconv.Itoa(pid))
+	out, err := cmd.Output()
+	if err != nil {
+		return ""
+	}
+	return strings.Trim(string(out), "\n")
+
+}
+
+func GetNameByPid(pid int) string {
+	path := "/proc/" + strconv.Itoa(pid) + "/comm"
+	fi, err := os.OpenFile(path, os.O_RDONLY, 0)
+	if err != nil {
+		return ""
+	}
+	defer fi.Close()
+
+	reader := bufio.NewReaderSize(fi, 50)
+	if reader != nil {
+		name, err := reader.ReadBytes('\n')
+		if err == nil {
+			return string(name[:len(name)-1])
+		}
+	}
+	return ""
 }
