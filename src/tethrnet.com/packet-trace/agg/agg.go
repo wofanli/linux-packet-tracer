@@ -17,7 +17,7 @@ const (
 )
 
 const (
-	DftMaxPkts = 512
+	DftMaxPkts = 32
 	DftMaxDura = time.Second * 5
 )
 
@@ -33,11 +33,15 @@ func (t TraceEventPerPacket) String() string {
 	str := ""
 	events := ([]*event.TraceEvent)(t)
 	for _, e := range events {
+		netns := e.Netns
+		if netns == "" {
+			netns = "default"
+		}
 		comp := plugin.PluginId2Str(e.PluginId)
 		if comp != "" {
-			str += fmt.Sprintf("%d,%s (%s), process: %v (pid %d), netns:%v\n", e.Id, comp, e.ProbePoint, e.Cmd, e.Pid, e.Netns)
+			str += fmt.Sprintf("%d,%s (%s), process: %v (pid %d), netns:%v\n", e.Id, comp, e.ProbePoint, e.Cmd, e.Pid, netns)
 		} else {
-			str += fmt.Sprintf("%d,%s, process: %v (pid %d), netns:%v\n", e.Id, e.ProbePoint, e.Cmd, e.Pid, e.Netns)
+			str += fmt.Sprintf("%d,%s, process: %v (pid %d), netns:%v\n", e.Id, e.ProbePoint, e.Cmd, e.Pid, netns)
 		}
 		str += fmt.Sprintf("    %v\n", e.Msg)
 	}

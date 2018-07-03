@@ -96,6 +96,10 @@ func PluginId2Str(t uint32) string {
 		return "ip fib lookup"
 	case IP_ROUTE_INPUT_NOREF_RET:
 		return "ip fib lookup finish"
+	case IP_TUNNEL_XMIT:
+		return "tunnel xmit"
+	case TCP_V4_RCV:
+		return "rcv a tcp pkt"
 	default:
 		return ""
 	}

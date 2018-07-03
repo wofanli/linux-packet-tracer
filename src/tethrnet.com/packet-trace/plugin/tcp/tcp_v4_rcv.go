@@ -16,13 +16,13 @@ typedef struct {
 	u32 src;
 	u32 dst;
 	tcp_hdr tcp;
-} sub_event_tcp_v4_rcv;
+} sub_event_tcp_v4;
 
 int kprobe__tcp_v4_rcv(struct pt_regs *ctx,struct sk_buff *skb){
 	log_event_t event = {};
 	event.skb_adr = (u64)(skb);
 	event.plugin = ___plugintype___;
-	sub_event_tcp_v4_rcv *subevent = (sub_event_tcp_v4_rcv*)event.desc;
+	sub_event_tcp_v4 *subevent = (sub_event_tcp_v4*)event.desc;
 
 	u8 exist = get_epoch(&event);
 	if (exist==EXIST) {
@@ -40,7 +40,7 @@ int kprobe__tcp_v4_rcv(struct pt_regs *ctx,struct sk_buff *skb){
 }
 `
 
-type sub_event_tcp_v4_rcv struct {
+type sub_event_tcp_v4 struct {
 	src     uint32
 	dst     uint32
 	seq     uint32
@@ -60,7 +60,7 @@ func (p *TcpV4Rcv) GetType() int {
 
 func (p *TcpV4Rcv) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	data := d[:]
-	event := (*sub_event_tcp_v4_rcv)(unsafe.Pointer(uintptr(C.CBytes(data))))
+	event := (*sub_event_tcp_v4)(unsafe.Pointer(uintptr(C.CBytes(data))))
 	ret := fmt.Sprintf("%v(%d)->%v(%d), seq:%d, ack_seq:%d, window:%d, %s",
 		util.Int2Ip(event.src),
 		event.sport,
