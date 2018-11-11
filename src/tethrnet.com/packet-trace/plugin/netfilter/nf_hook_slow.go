@@ -38,6 +38,8 @@ typedef struct {
 	u8 pf;
 	u8 drop;
 	u8 pad[2];
+	u32 mark;
+	u32 pad2;
 }sub_event_nf_hook_slow;
 
 int kprobe__nf_hook_slow(struct pt_regs *ctx, struct sk_buff *skb, struct nf_hook_state *state){
@@ -52,6 +54,7 @@ int kprobe__nf_hook_slow(struct pt_regs *ctx, struct sk_buff *skb, struct nf_hoo
 		subevent->outdev = state->out->ifindex;
 		subevent->hook = state->hook;
 		subevent->pf = state->pf;
+		subevent->mark = skb->mark;
 		nf_hook_slow_cache_t cache = {};
 		cache.skb = (u64)skb;
 		cache.hook = state->hook;
@@ -70,6 +73,9 @@ type sub_event_nf_hook_slow struct {
 	hook   uint32
 	pf     uint8
 	drop   uint8
+	pad1   uint16
+	mark   uint32
+	pad2   uint32
 }
 
 type NF_HOOK_SLOW struct {
@@ -86,10 +92,11 @@ func (p *NF_HOOK_SLOW) GetType() int {
 func (p *NF_HOOK_SLOW) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	data := d[:]
 	event := (*sub_event_nf_hook_slow)(unsafe.Pointer(uintptr(C.CBytes(data))))
-	return fmt.Sprintf("Will check %v, %v, In_intf:%v, Out_intf:%v",
+	return fmt.Sprintf("Will check %v, %v, In_intf:%v, Out_intf:%v, mark:0x%x",
 		util.PF2Str(int(event.pf)), util.Hook2Str(int(event.hook)),
 		common.CommonInst.GetIntf(int(event.indev)),
-		common.CommonInst.GetIntf(int(event.outdev)))
+		common.CommonInst.GetIntf(int(event.outdev)),
+		event.mark)
 }
 
 func (p *NF_HOOK_SLOW) Init(m *bpf.Module) error {

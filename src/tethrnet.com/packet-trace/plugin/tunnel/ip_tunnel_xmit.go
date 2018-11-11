@@ -15,6 +15,8 @@ import (
 const source_gre string = `
 typedef struct {
 	u64    if_idx;
+	u32    mark;
+	u32    pad;
 	ip_hdr inner;
 	ip_hdr outter;
 } sub_event_tunnel;
@@ -30,6 +32,7 @@ int kprobe__ip_tunnel_xmit(struct pt_regs *ctx,struct sk_buff *skb, struct net_d
 	if (exist==EXIST) {
 		unsigned char * hdr_ = skb->head + skb->inner_network_header;
 		ip_hdr *hdr = (ip_hdr*)hdr_;
+		subevent->mark = skb->mark;
 		subevent->inner.saddr = hdr->saddr;
 		subevent->inner.daddr = hdr->daddr;
 		subevent->inner.tos = hdr->tos;
@@ -55,6 +58,8 @@ int kprobe__ip_tunnel_xmit(struct pt_regs *ctx,struct sk_buff *skb, struct net_d
 
 type sub_event_tunnel struct {
 	ifIdx         uint64
+	mark          uint32
+	pad           uint32
 	inner, outter common.Sub_event_ip_hdr
 }
 
@@ -68,7 +73,7 @@ func (p *IpTunnelXmit) GetType() int {
 func (p *IpTunnelXmit) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	data := d[:]
 	event := (*sub_event_tunnel)(unsafe.Pointer(uintptr(C.CBytes(data))))
-	return fmt.Sprintf("ip tunnel egress(%v), outter hdr: %v->%v, tos:0x%x, ttl:%d, protocol:%v, total_len:%d, inner hdr: %v->%v, tos:0x%x, ttl:%d, protocol:%v, total_len:%d",
+	return fmt.Sprintf("ip tunnel egress(%v), outter hdr: %v->%v, tos:0x%x, ttl:%d, protocol:%v, total_len:%d, inner hdr: %v->%v, tos:0x%x, ttl:%d, protocol:%v, total_len:%d, mark:0x%x",
 		common.CommonInst.GetIntf(int(event.ifIdx)),
 		util.Int2Ip(event.outter.Src),
 		util.Int2Ip(event.outter.Dst),
@@ -77,7 +82,8 @@ func (p *IpTunnelXmit) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 		util.Int2Ip(event.inner.Src),
 		util.Int2Ip(event.inner.Dst),
 		event.inner.Tos, event.inner.Ttl,
-		util.IPv4ProtToStr(event.inner.Prot), event.inner.Tot_len)
+		util.IPv4ProtToStr(event.inner.Prot), event.inner.Tot_len,
+		event.mark)
 }
 
 func (p *IpTunnelXmit) Init(m *bpf.Module) error {

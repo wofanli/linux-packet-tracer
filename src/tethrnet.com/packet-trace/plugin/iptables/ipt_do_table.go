@@ -90,7 +90,7 @@ func (p *IptDoTable) GetType() int {
 func (p *IptDoTable) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	data := d[:]
 	event := (*sub_event_ipt_do_table_t)(unsafe.Pointer(uintptr(C.CBytes(data))))
-	return fmt.Sprintf("Will check %v, %v, %v, In_intf:%v, Out_intf:%v, mark:%x",
+	return fmt.Sprintf("Will check %v, %v, %v, In_intf:%v, Out_intf:%v, mark:0x%x",
 		string(event.tbl_name[:]), //C.GoString(event.tbl_name),
 		util.PF2Str(int(event.pf)), util.Hook2Str(int(event.hook)),
 		common.CommonInst.GetIntf(int(event.indev)),
