@@ -69,7 +69,9 @@ func NewGluer(cfg *GluerConfig) *Gluer {
 		&route.IpRouteInputNoref{},
 		&route.IpRouteInputNorefRet{},
 		&tunnel.IpTunnelXmit{},
+		&tunnel.IpTunnelXmitCore{},
 		&tcp.TcpV4Rcv{},
+		&ip.IpLocalOut{},
 	)
 
 	g := &Gluer{}

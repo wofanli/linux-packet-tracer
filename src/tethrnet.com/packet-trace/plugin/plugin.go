@@ -47,7 +47,9 @@ const (
 	IP_ROUTE_INPUT_NOREF
 	IP_ROUTE_INPUT_NOREF_RET
 	IP_TUNNEL_XMIT
+	IP_TUNNEL_XMIT_CORE
 	TCP_V4_RCV
+	IP_LOCAL_OUT
 )
 
 func PluginId2Str(t uint32) string {
@@ -58,6 +60,8 @@ func PluginId2Str(t uint32) string {
 		return "classifier"
 	case IP_RCV:
 		return "ip_rcv"
+	case IP_LOCAL_OUT:
+		return "ip_local_out"
 	case IP_RCV_RET:
 		return "ip_rcv return"
 	case IP_RCV_FINISH:
@@ -98,6 +102,8 @@ func PluginId2Str(t uint32) string {
 		return "ip fib lookup finish"
 	case IP_TUNNEL_XMIT:
 		return "tunnel xmit"
+	case IP_TUNNEL_XMIT_CORE:
+		return "tunnel xmit common"
 	case TCP_V4_RCV:
 		return "rcv a tcp pkt"
 	default:
