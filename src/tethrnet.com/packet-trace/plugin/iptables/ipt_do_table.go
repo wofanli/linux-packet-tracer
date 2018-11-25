@@ -31,7 +31,7 @@ typedef struct {
 	u8 ret;
 	u8 pad[2];
 	u32 mark;
-	u32 pad2;
+	u32 prio;
 	char tbl_name[___XT_TABLE_MAXNAMELEN___];
 }sub_event_ipt_do_table_t;
 
@@ -51,6 +51,7 @@ int kprobe__ipt_do_table(struct pt_regs *ctx, struct sk_buff *skb,
 		subevent->hook = state->hook;
 		subevent->pf = state->pf;
 		subevent->mark = skb->mark;
+		subevent->prio = skb->priority;
 		bpf_probe_read(subevent->tbl_name, ___XT_TABLE_MAXNAMELEN___, (void*)(table->name));	
 		ipt_do_table_cache_t cache = {};
 		cache.skb = (u64)skb;
@@ -76,7 +77,7 @@ type sub_event_ipt_do_table_t struct {
 	ret      uint8
 	pad      [2]uint8
 	mark     uint32
-	pad2     uint32
+	prio     uint32
 	tbl_name [XT_TABLE_MAXNAMELEN]byte
 }
 
@@ -90,12 +91,12 @@ func (p *IptDoTable) GetType() int {
 func (p *IptDoTable) Decode(d [plugin.MAX_MSG_LEN]byte) string {
 	data := d[:]
 	event := (*sub_event_ipt_do_table_t)(unsafe.Pointer(uintptr(C.CBytes(data))))
-	return fmt.Sprintf("Will check %v, %v, %v, In_intf:%v, Out_intf:%v, mark:0x%x",
+	return fmt.Sprintf("Will check %v, %v, %v, In_intf:%v, Out_intf:%v, mark:0x%x, priority:%d",
 		string(event.tbl_name[:]), //C.GoString(event.tbl_name),
 		util.PF2Str(int(event.pf)), util.Hook2Str(int(event.hook)),
 		common.CommonInst.GetIntf(int(event.indev)),
 		common.CommonInst.GetIntf(int(event.outdev)),
-		event.mark)
+		event.mark, event.prio)
 }
 
 func (p *IptDoTable) Init(m *bpf.Module) error {
