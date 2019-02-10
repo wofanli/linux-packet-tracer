@@ -24,7 +24,7 @@ typedef struct {
 	u8 icmp_code;
 } sub_event_ip_rcv;
 
-int kprobe__ip_rcv(struct pt_regs *ctx,struct sk_buff *skb){
+int kprobe____qdisc_calculate_pkt_len(struct pt_regs *ctx,struct sk_buff *skb){
 	log_event_t event = {};
 
 	event.skb_adr = (u64)(skb);
@@ -95,7 +95,7 @@ func (p *IpRecv) GetSource() string {
 }
 
 func (p *IpRecv) GetProbePoint() (name string, probeType string) {
-	return "ip_rcv", plugin.KPROBE
+	return "__qdisc_calculate_pkt_len", plugin.KPROBE
 }
 
 func (p *IpRecv) GetProbeName() string {
